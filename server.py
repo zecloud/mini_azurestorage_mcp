@@ -18,6 +18,21 @@ from azure.core.exceptions import AzureError
 
 app = Server("mini-azurestorage-mcp")
 
+_blob_service_client: BlobServiceClient | None = None
+_cached_connection_string: str = ""
+
+
+def _get_blob_service_client() -> BlobServiceClient | None:
+    """Return a cached BlobServiceClient, recreating it only when the connection string changes."""
+    global _blob_service_client, _cached_connection_string
+    connection_string = os.environ.get("AZURE_STORAGE_CONNECTION_STRING", "")
+    if not connection_string:
+        return None
+    if _blob_service_client is None or connection_string != _cached_connection_string:
+        _blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+        _cached_connection_string = connection_string
+    return _blob_service_client
+
 
 @app.list_tools()
 async def list_tools() -> list[types.Tool]:
@@ -66,7 +81,7 @@ async def list_tools() -> list[types.Tool]:
 @app.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
     if name != "upload_file":
-        raise ValueError(f"Unknown tool: {name}")
+        return [types.TextContent(type="text", text=f"Error: Unsupported tool: {name}")]
 
     local_file_path = arguments.get("local_file_path", "")
     container_name = arguments.get("container_name", "")
@@ -102,15 +117,27 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
         ]
 
     try:
-        blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+        blob_service_client = _get_blob_service_client()
+        if blob_service_client is None:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=(
+                        "Error: Environment variable 'AZURE_STORAGE_CONNECTION_STRING' is not set. "
+                        "Please set it to your Azure Storage connection string."
+                    ),
+                )
+            ]
         blob_client = blob_service_client.get_blob_client(
             container=container_name, blob=full_blob_name
         )
 
-        with open(file_path, "rb") as data:
-            blob_client.upload_blob(data, overwrite=True)
+        def _do_upload() -> str:
+            with open(file_path, "rb") as data:
+                blob_client.upload_blob(data, overwrite=True)
+            return blob_client.url
 
-        url = blob_client.url
+        url = await asyncio.to_thread(_do_upload)
         return [
             types.TextContent(
                 type="text",

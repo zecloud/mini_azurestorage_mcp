@@ -17,4 +17,4 @@ dependencies = [
 mini-azurestorage-mcp = "server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+only-include = ["server.py"]

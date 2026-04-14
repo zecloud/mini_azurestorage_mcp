@@ -1,4 +1,4 @@
-# mini_azurestorage_mcp
+# mini-azurestorage-mcp
 
 A **stdio MCP server** (built with the [official MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)) that exposes one tool for uploading a local file to an **Azure Blob Storage** container under a chosen subfolder.
 
