@@ -23,8 +23,14 @@ pip install mcp>=1.27.0 azure-storage-blob>=12.28.0
 
 Set the connection string as an environment variable before running the server:
 
+**Linux / macOS:**
 ```bash
 export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net"
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:AZURE_STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net"
 ```
 
 ## Running the server
@@ -47,6 +53,7 @@ Uploads a local file to an Azure Blob Storage container.
 | `container_name` | string | ✅ | Name of the target Azure Blob Storage container |
 | `subfolder` | string | ➖ | Virtual path prefix inside the container (default: `""`) |
 | `blob_name` | string | ➖ | Name for the blob (default: the file's base name) |
+| `overwrite` | boolean | ➖ | Whether to overwrite an existing blob (default: `true`) |
 
 ### Example
 
