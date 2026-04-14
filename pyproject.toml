@@ -14,7 +14,10 @@ dependencies = [
 ]
 
 [project.scripts]
-mini-azurestorage-mcp = "server:main"
+mini-azurestorage-mcp = "mini_azurestorage_mcp.server:main"
 
 [tool.hatch.build.targets.wheel]
 only-include = ["server.py"]
+
+[tool.hatch.build.targets.wheel.sources]
+"server.py" = "mini_azurestorage_mcp/server.py"
