@@ -9,12 +9,15 @@ description = "A stdio MCP server that uploads local files to Azure Blob Storage
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "mcp>=1.27.0",
-    "azure-storage-blob>=12.28.0",
+    "mcp~=1.27.0",
+    "azure-storage-blob~=12.28.0",
 ]
 
 [project.scripts]
-mini-azurestorage-mcp = "server:main"
+mini-azurestorage-mcp = "mini_azurestorage_mcp.server:main"
 
 [tool.hatch.build.targets.wheel]
 only-include = ["server.py"]
+
+[tool.hatch.build.targets.wheel.sources]
+"server.py" = "mini_azurestorage_mcp/server.py"
